@@ -5,7 +5,10 @@
 out/
 out/**
 
-.target/classes/*
+out/
+out/**
+
+.target/classes/**
 
 # sensitive 
 src/main/resources/smtpmail.properties
