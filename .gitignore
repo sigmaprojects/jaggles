@@ -1,0 +1,11 @@
+# IDE-specific stuff:
+.idea/
+.idea/**
+
+.out/
+.out/**
+
+.target/classes/*
+
+# sensitive 
+src/main/resources/smtpmail.properties
