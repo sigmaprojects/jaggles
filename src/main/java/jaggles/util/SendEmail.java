@@ -70,7 +70,8 @@ public class SendEmail {
             message.setRecipients(Message.RecipientType.TO,
                     InternetAddress.parse(props.getProperty("mailto")));
             message.setSubject(props.getProperty("mailsubject") + " " + new Date());
-            message.setText( String.join("\\r\\n", ProcessLog.getLog()) );
+            message.setContent( String.join("<br />", ProcessLog.getLog()), "text/html; charset=utf-8" );
+
 
             Transport.send(message);
 
