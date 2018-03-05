@@ -8,8 +8,8 @@ out/**
 out/
 out/**
 
-.target/classes/
-.target/classes/**
+target/classes/
+target/classes/**
 
 # sensitive 
 src/main/resources/smtpmail.properties
