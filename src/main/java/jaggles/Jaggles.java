@@ -5,6 +5,10 @@
  */
 package jaggles;
 
+import jaggles.Git.GitBackup;
+import jaggles.Git.GitBackupService;
+import jaggles.MySQL.MySQLBackupService;
+import jaggles.MySQL.MySQLDump;
 import jaggles.items.Git;
 import jaggles.items.Item;
 import jaggles.items.MySQLHost;
@@ -23,7 +27,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -40,6 +43,7 @@ public class Jaggles {
     /**
      * @param args the command line arguments
      */
+    @SuppressWarnings("LoopStatementThatDoesntLoop")
     public static void main(String[] args) {
 
         Options options = new Options();
@@ -87,25 +91,29 @@ public class Jaggles {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
+        MySQLBackupService mySQLBackupService = new MySQLBackupService(10, getJarDir(Jaggles.class));
+        GitBackupService gitBackupService = new GitBackupService();
+
         try {
             ExecutorService executorService = Executors.newFixedThreadPool(100);
 
-            List<Callable<String>> taskList = new ArrayList<Callable<String>>();
+            List<Callable<String>> taskList = new ArrayList<>();
 
             TimeKeeper allTk = new TimeKeeper();
             for (Item item : backupItems) {
                 Callable<String> task = () -> {
                     if( item instanceof Git ) {
-                        GitBackup gitBackup = new GitBackup( (Git)item );
-                        gitBackup.backup();
+                        GitBackup gitBackup = gitBackupService.createWorker( (Git)item );
+                       gitBackup.start();
                     } else if( item instanceof MySQLHost ) {
-                        MySQLDump mySQLDump = new MySQLDump( (MySQLHost) item ,getJarDir(Jaggles.class));
-                        if( mySQLDump.getIsReady() ) {
-                            mySQLDump.backupThreaded(10);
+                        if( mySQLBackupService.getIsReady() ) {
+                            MySQLDump mySQLDump = mySQLBackupService.createWorker(
+                                (MySQLHost) item
+                            );
+                            mySQLDump.start();
                         }
                     } else if( item instanceof SMB ) {
-                        SMBBackup smbBackup = new SMBBackup( (SMB)item );
-                        smbBackup.backup(40);
+                        new SMBBackup( (SMB)item ).backup(40);
                     }
                     return "All Backup Items Finished";
                 };
@@ -113,6 +121,7 @@ public class Jaggles {
             }
 
             List<Future<String>> futures = executorService.invokeAll(taskList);
+            //noinspection LoopStatementThatDoesntLoop
             for (Future<String> future : futures) {
                 // The result is printed only after all the futures are complete. (i.e. after 5 seconds)
                 System.out.println(future.get());
@@ -131,7 +140,7 @@ public class Jaggles {
     }
 
 
-    public static File getBackupFilePath(String path) {
+    private static File getBackupFilePath(String path) {
         Calendar ca1 = Calendar.getInstance();
         ca1.setMinimalDaysInFirstWeek(1);
         int wk = ca1.get(Calendar.WEEK_OF_MONTH);

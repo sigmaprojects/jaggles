@@ -15,8 +15,8 @@ import java.util.concurrent.*;
 
 public class SMBBackup {
 
-    SMB smb;
-    String fullBackupPath;
+    private SMB smb;
+    private String fullBackupPath;
 
     SMBBackup(SMB smb) {
         this.smb = smb;
@@ -37,7 +37,7 @@ public class SMBBackup {
             FileObject smbShare = fs.resolveFile("smb://" + smb.getServer() + "/" + smb.getShareName() + "/" + smb.getPath(), opts); // added opts!
 
             ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-            List<Callable<String>> taskList = new ArrayList<Callable<String>>();
+            List<Callable<String>> taskList = new ArrayList<>();
             TimeKeeper allTk = new TimeKeeper();
             for(FileObject fo : smbShare.getChildren() ) {
                 Callable<String> task = () -> {
@@ -51,6 +51,7 @@ public class SMBBackup {
             }
 
             List<Future<String>> futures = executorService.invokeAll(taskList);
+            //noinspection LoopStatementThatDoesntLoop
             for(Future<String> future: futures) {
                 // The result is printed only after all the futures are complete.
                 try {
@@ -80,7 +81,7 @@ public class SMBBackup {
         }
     }
 
-    public void backupSMBFile(FileObject smbFile) {
+    private void backupSMBFile(FileObject smbFile) {
         try {
             //String removeFromPath = "smb://" + smb.getServer() + "/" + smb.getPath() + "/";
             // just get the last file or folder name
@@ -100,12 +101,12 @@ public class SMBBackup {
 
             FileSelector fileSelector = new FileSelector() {
                 @Override
-                public boolean includeFile(FileSelectInfo fileSelectInfo) throws Exception {
+                public boolean includeFile(FileSelectInfo fileSelectInfo) {
                     return true;
                 }
 
                 @Override
-                public boolean traverseDescendents(FileSelectInfo fileSelectInfo) throws Exception {
+                public boolean traverseDescendents(FileSelectInfo fileSelectInfo) {
                     return true;
                 }
             };
