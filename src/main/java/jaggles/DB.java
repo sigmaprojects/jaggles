@@ -228,7 +228,8 @@ public class DB {
                         this.server +
                         ":" + this.portNumber +
                         "/" + this.database +
-                        "?useSSL=" + this.useSSL,
+                        "?useSSL=" + this.useSSL +
+                        "&useLegacyDatetimeCode=false&serverTimezone=UTC", // bug with mysql 6.0.6 https://bugs.mysql.com/bug.php?id=81214
                 connectionProps
         );
 
