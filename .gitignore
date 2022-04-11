@@ -11,5 +11,8 @@ out/**
 target/classes/
 target/classes/**
 
+backups/
+backups/**
+
 # sensitive 
 src/main/resources/smtpmail.properties
