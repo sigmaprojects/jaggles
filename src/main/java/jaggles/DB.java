@@ -229,7 +229,9 @@ public class DB {
                         ":" + this.portNumber +
                         "/" + this.database +
                         "?useSSL=" + this.useSSL +
-                        "&useLegacyDatetimeCode=false&serverTimezone=UTC", // bug with mysql 6.0.6 https://bugs.mysql.com/bug.php?id=81214
+                        "&useLegacyDatetimeCode=false&serverTimezone=UTC&enabledTLSProtocols=TLSv1.2",
+                        // useLegacyDatetimeCode bug with mysql 6.0.6 https://bugs.mysql.com/bug.php?id=81214
+                        // enabledTLSProtocols https://stackoverflow.com/questions/67332909/why-can-java-not-connect-to-mysql-5-7-after-the-latest-jdk-update-and-how-should
                 connectionProps
         );
 
